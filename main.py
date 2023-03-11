@@ -6,7 +6,7 @@ import ctypes as ct
 from mathematics import calculate_expression, plot, solve, convert, scientific
 from enum import Enum
 
-Mode = Enum('Mode', 'Calculator Solve Plot Scientific Conversion')
+Mode = Enum('Mode', 'Calculator Solve Scientific Plot Conversion')
 
 def dark_title_bar(window):
     '''
@@ -29,9 +29,9 @@ class Application(Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
-        self.set_mode(Mode.Calculator)
+        self.frame = None
         self.create_menu()
-        self.create_widgets()
+        self.set_mode(Mode.Calculator)
 
     def create_menu(self):
         menu = Menu(self.master)
@@ -42,15 +42,30 @@ class Application(Frame):
         modeMenu.add_command(label='Calculator', command=partial(self.set_mode, Mode.Calculator))
         modeMenu.add_command(label='Solve for x', command=partial(self.set_mode, Mode.Solve))
         modeMenu.add_command(label='Scientific notation', command=partial(self.set_mode, Mode.Scientific))
-        # modeMenu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
         # modeMenu.add_command(label='Plot', command=partial(self.set_mode, Mode.Plot))
+        # modeMenu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
         menu.add_cascade(label='Mode', menu=modeMenu)
     
     def set_mode(self, mode: Mode):
         self.mode = mode
         self.master.title(f'Math GUI - {mode.name}')
+        if self.frame:
+            self.frame.destroy()
+        match self.mode:
+            case Mode.Calculator:
+                self.create_calculator_widgets()
+            case Mode.Solve:
+                self.create_calculator_widgets()
+            case Mode.Scientific:
+                self.create_calculator_widgets()
+            case Mode.Plot:
+                # TODO
+                pass
+            case Mode.Conversion:
+                # TODO
+                pass
 
-    def create_widgets(self):
+    def create_calculator_widgets(self):
         self.frame = Frame(self.master)
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)  
 
@@ -82,16 +97,28 @@ class Application(Frame):
                     result = calculate_expression(input)
                 case Mode.Solve:
                     result = solve(input)
-                case Mode.Plot:
-                    result = plot(input)
                 case Mode.Scientific:
                     result = scientific(input)
+                case Mode.Plot:
+                    result = plot(input)
                 case Mode.Conversion:
                     result = convert(input)
         except Exception as e:
             result = str(e)
-
-        self.result_field['text'] = f'\n{result}\n'
+        
+        match self.mode:
+            case Mode.Calculator:
+                self.result_field['text'] = f'\n{result}\n'
+            case Mode.Solve:
+                self.result_field['text'] = f'\n{result}\n'
+            case Mode.Scientific:
+                self.result_field['text'] = f'\n{result}\n'
+            case Mode.Plot:
+                # TODO
+                pass
+            case Mode.Conversion:
+                # TODO
+                pass
 
 if __name__ == '__main__':
     root = ThemedTk(className='Math GUI', theme='equilux')
@@ -101,6 +128,7 @@ if __name__ == '__main__':
 
     root.geometry('600x200')
 
+    # Dark mode
     root.config(background='#1e1e1e')
     dark_title_bar(root)
     
