@@ -29,7 +29,6 @@ class Application(Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.master = master
-        self.pack()
         self.set_mode(Mode.Calculator)
         self.create_menu()
         self.create_widgets()
@@ -52,13 +51,23 @@ class Application(Frame):
         self.master.title(f'Math GUI - {mode.name}')
 
     def create_widgets(self):
-        self.result_field = ttk.Label(self, text='\n\n\n')
-        self.result_field.pack(side='top', fill='x')
+        self.frame = Frame(self.master)
+        self.frame.grid(row=0, column=0, sticky=E+W+N+S)  
 
-        self.label = ttk.Label(self, text='Enter your mathematical expression:')
-        self.label.pack(side='top', fill='x')
-        self.entry_field = ttk.Entry(self, width=50)
-        self.entry_field.pack(side='bottom', fill='x')
+        self.result_field = ttk.Label(self.frame, text='\n\n\n')
+        self.result_field.grid(row=0, column=0, sticky=E+W+N+S)
+
+        self.label = ttk.Label(self.frame, text='Enter your mathematical expression:')
+        self.label.grid(row=1, column=0, sticky=E+W+N+S)
+        self.entry_field = ttk.Entry(self.frame, width=50)
+        self.entry_field.grid(row=2, column=0, sticky=E+W+N+S)
+
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.frame.columnconfigure(0, weight=1)
+        self.frame.rowconfigure(0, weight=1)
+        self.frame.rowconfigure(1, weight=1)
+        self.frame.rowconfigure(2, weight=1)
 
         self.entry_field.bind('<Return>', self.evaluate)
         self.entry_field.focus()
