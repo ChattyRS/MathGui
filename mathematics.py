@@ -418,7 +418,7 @@ def calculate_expression(*formulas) -> str:
         formula = beautify_input(formula)
         return f'{formula} = {output}'
     except Exception as e:
-        raise ValueError(f'Invalid mathematical expression:\n```{e}```')
+        raise ValueError(f'Invalid mathematical expression:\n\t{e}')
 
 def plot(start: float, end: float, *formulas) -> Tuple[str, io.BytesIO]:
     '''

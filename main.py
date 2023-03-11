@@ -67,17 +67,20 @@ class Application(Frame):
         input = self.entry_field.get()
 
         result = ''
-        match self.mode:
-            case Mode.Calculator:
-                result = calculate_expression(input)
-            case Mode.Solve:
-                result = solve(input)
-            case Mode.Plot:
-                result = plot(input)
-            case Mode.Scientific:
-                result = scientific(input)
-            case Mode.Conversion:
-                result = convert(input)
+        try:
+            match self.mode:
+                case Mode.Calculator:
+                    result = calculate_expression(input)
+                case Mode.Solve:
+                    result = solve(input)
+                case Mode.Plot:
+                    result = plot(input)
+                case Mode.Scientific:
+                    result = scientific(input)
+                case Mode.Conversion:
+                    result = convert(input)
+        except Exception as e:
+            result = str(e)
 
         self.result_field['text'] = f'Result:\n\n\t{result}\n'
 
