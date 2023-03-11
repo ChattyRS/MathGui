@@ -123,8 +123,9 @@ def format_input(input: str, style: int) -> str:
         input = input.replace('sin', 'cmath.sin')
         input = input.replace('cos', 'cmath.cos')
         input = input.replace('tan', 'cmath.tan')
-        input = input.replace('floor', 'wrap_fn(\'math.floor\',')
+        input = input.replace('floor(', 'wrap_fn(\'math.floor\',')
         input = input.replace('ceil(', 'wrap_fn(\'math.ceil\',')
+        input = input.replace('round(', 'wrap_fn(\'round\',')
         input = input.replace('sqrt', 'cmath.sqrt')
         input = input.replace('log', 'cmath.log')
         input = input.replace('sum', 'calcsum')
@@ -423,7 +424,7 @@ def calculate_expression(*formulas) -> str:
         formula = beautify_input(formula)
         return f'{formula} = {output}'
     except Exception as e:
-        raise ValueError(f'Invalid mathematical expression:\n\t{e}')
+        raise ValueError(f'Invalid mathematical expression:\n{e}')
 
 def plot(start: float, end: float, *formulas) -> Tuple[str, io.BytesIO]:
     '''

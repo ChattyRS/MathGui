@@ -67,7 +67,7 @@ class Application(Frame):
 
     def create_calculator_widgets(self):
         self.frame = Frame(self.master)
-        self.frame.grid(row=0, column=0, sticky=E+W+N+S)  
+        self.frame.grid(row=0, column=0, sticky=E+W+N+S)
 
         self.result_field = ttk.Label(self.frame, text='\n\n', font=('Arial', 30), anchor='center')
         self.result_field.grid(row=0, column=0, sticky=E+W+N+S)
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     img = Image("photo", file='assets/calculator_icon.png')
     root.iconphoto(True, img)
 
-    root.geometry('600x200')
+    root.geometry('800x300')
 
     # Dark mode
     root.config(background='#1e1e1e')
