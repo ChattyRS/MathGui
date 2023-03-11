@@ -54,12 +54,12 @@ class Application(Frame):
         self.frame = Frame(self.master)
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)  
 
-        self.result_field = ttk.Label(self.frame, text='\n\n\n')
+        self.result_field = ttk.Label(self.frame, text='\n\n', font=('Arial', 30), anchor='center')
         self.result_field.grid(row=0, column=0, sticky=E+W+N+S)
 
-        self.label = ttk.Label(self.frame, text='Enter your mathematical expression:')
+        self.label = ttk.Label(self.frame, text='Enter your mathematical expression:', anchor='sw')
         self.label.grid(row=1, column=0, sticky=E+W+N+S)
-        self.entry_field = ttk.Entry(self.frame, width=50)
+        self.entry_field = ttk.Entry(self.frame, font=('Arial', 20))
         self.entry_field.grid(row=2, column=0, sticky=E+W+N+S)
 
         self.master.columnconfigure(0, weight=1)
@@ -91,13 +91,15 @@ class Application(Frame):
         except Exception as e:
             result = str(e)
 
-        self.result_field['text'] = f'Result:\n\n\t{result}\n'
+        self.result_field['text'] = f'\n{result}\n'
 
 if __name__ == '__main__':
     root = ThemedTk(className='Math GUI', theme='equilux')
     # Set favicon
     img = Image("photo", file='assets/calculator_icon.png')
     root.iconphoto(True, img)
+
+    root.geometry('600x200')
 
     root.config(background='#1e1e1e')
     dark_title_bar(root)
