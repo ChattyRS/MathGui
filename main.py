@@ -69,7 +69,7 @@ class Application(Frame):
         self.frame = Frame(self.master)
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)
 
-        self.result_field = ttk.Label(self.frame, text='\n\n', font=('Arial', 30), anchor='center')
+        self.result_field = ttk.Label(self.frame, text='\n\n\n', font=('Arial', 30), anchor='center')
         self.result_field.grid(row=0, column=0, sticky=E+W+N+S)
 
         self.label = ttk.Label(self.frame, text='Enter your mathematical expression:', anchor='sw')
@@ -94,11 +94,11 @@ class Application(Frame):
         try:
             match self.mode:
                 case Mode.Calculator:
-                    result = calculate_expression(input)
+                    result = calculate_expression(input) + '\n'
                 case Mode.Solve:
-                    result = solve(input)
+                    result = solve(input) + '\n'
                 case Mode.Scientific:
-                    result = scientific(input)
+                    result = scientific(input) + '\n'
                 case Mode.Plot:
                     result = plot(input)
                 case Mode.Conversion:
