@@ -9,7 +9,7 @@ import sympy
 from utils import is_int, is_float, float_to_formatted_string
 from forex_python.converter import CurrencyRates
 from utils import units, unit_aliases
-import io
+from datetime import datetime
 
 numeric = Union[int, float, complex, np.number]
 
@@ -426,7 +426,7 @@ def calculate_expression(*formulas) -> str:
     except Exception as e:
         raise ValueError(f'Invalid mathematical expression:\n{e}')
 
-def plot(start: float, end: float, *formulas) -> Tuple[str, io.BytesIO]:
+def plot(start: float, end: float, *formulas) -> Tuple[str, str]:
     '''
     Plots a given mathematical function
     Arguments: start, end, f(x)
@@ -450,7 +450,8 @@ def plot(start: float, end: float, *formulas) -> Tuple[str, io.BytesIO]:
     formula = formula.strip()
     if not is_float(start) or not is_float(end):
         raise ValueError(f'Invalid argument(s): `start/end`.')
-    elif start >= end:
+    start, end = float(start), float(end)
+    if start >= end:
         raise ValueError(f'Invalid arguments: `start`, `end`.')
     if not formula:
         raise ValueError(f'Required argument missing: `formula`.')
@@ -461,6 +462,10 @@ def plot(start: float, end: float, *formulas) -> Tuple[str, io.BytesIO]:
 
         plt.style.use('dark_background')
         fig, ax = plt.subplots()
+
+        # Set background colour
+        ax.set_facecolor('#464646')
+        fig.patch.set_facecolor('#464646')
 
         val = plot_func(x, input)
         
@@ -475,16 +480,14 @@ def plot(start: float, end: float, *formulas) -> Tuple[str, io.BytesIO]:
         ax.yaxis.grid()
         ax.xaxis.grid()
         plt.xlim(start, end)
-        plt.savefig('images/math_graph.png', transparent=True)
+        file_name = f'images/plot_{datetime.utcnow().strftime("%Y-%m-%d_%H%M%S%f")}.png'
+        plt.savefig(file_name, facecolor=fig.get_facecolor())
         plt.close(fig)
 
-        with open('images/math_graph.png', 'rb') as f:
-            file = io.BytesIO(f.read())
-
         formula = beautify_input(formula)
-        return (f'𝘧(𝓍) = {formula}', file)
+        return (f'𝘧(𝓍) = {formula}', file_name)
     except Exception as e:
-        raise ValueError(f'Invalid mathematical expression: \n```{e}```')
+        raise ValueError(f'Invalid mathematical expression:\n{e}')
 
 def solve(*formulas) -> str:
     '''

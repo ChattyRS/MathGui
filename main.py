@@ -1,10 +1,12 @@
 from functools import partial
 from tkinter import *
+from tkinter import Image as TkImage
 from tkinter import ttk
 from ttkthemes import ThemedTk
 import ctypes as ct
 from mathematics import calculate_expression, plot, solve, convert, scientific
 from enum import Enum
+from PIL import ImageTk, Image
 
 Mode = Enum('Mode', 'Calculator Solve Scientific Plot Conversion')
 
@@ -42,7 +44,7 @@ class Application(Frame):
         modeMenu.add_command(label='Calculator', command=partial(self.set_mode, Mode.Calculator))
         modeMenu.add_command(label='Solve for x', command=partial(self.set_mode, Mode.Solve))
         modeMenu.add_command(label='Scientific notation', command=partial(self.set_mode, Mode.Scientific))
-        # modeMenu.add_command(label='Plot', command=partial(self.set_mode, Mode.Plot))
+        modeMenu.add_command(label='Plot', command=partial(self.set_mode, Mode.Plot))
         # modeMenu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
         menu.add_cascade(label='Mode', menu=modeMenu)
     
@@ -59,8 +61,7 @@ class Application(Frame):
             case Mode.Scientific:
                 self.create_calculator_widgets()
             case Mode.Plot:
-                # TODO
-                pass
+                self.create_plot_widgets()
             case Mode.Conversion:
                 # TODO
                 pass
@@ -72,7 +73,14 @@ class Application(Frame):
         self.result_field = ttk.Label(self.frame, text='\n\n\n', font=('Arial', 30), anchor='center')
         self.result_field.grid(row=0, column=0, sticky=E+W+N+S)
 
-        self.label = ttk.Label(self.frame, text='Enter your mathematical expression:', anchor='sw')
+        match self.mode:
+            case Mode.Calculator:
+                self.label = ttk.Label(self.frame, text='Enter an expression:', anchor='sw')
+            case Mode.Solve:
+                self.label = ttk.Label(self.frame, text='Enter an equality for x:', anchor='sw')
+            case Mode.Scientific:
+                self.label = ttk.Label(self.frame, text='Enter a value in normal or scientific notation:', anchor='sw')
+        
         self.label.grid(row=1, column=0, sticky=E+W+N+S)
         self.entry_field = ttk.Entry(self.frame, font=('Arial', 20))
         self.entry_field.grid(row=2, column=0, sticky=E+W+N+S)
@@ -81,8 +89,46 @@ class Application(Frame):
         self.master.rowconfigure(0, weight=1)
         self.frame.columnconfigure(0, weight=1)
         self.frame.rowconfigure(0, weight=1)
-        self.frame.rowconfigure(1, weight=1)
         self.frame.rowconfigure(2, weight=1)
+
+        self.entry_field.bind('<Return>', self.evaluate)
+        self.entry_field.focus()
+
+    def create_plot_widgets(self):
+        if self.master.winfo_width() < 650 or self.master.winfo_height() < 700:
+            self.master.geometry('650x700')
+
+        self.frame = Frame(self.master)
+        self.frame.grid(row=0, column=0, sticky=E+W+N+S)
+
+        self.result_field = ttk.Label(self.frame, text='\n', font=('Arial', 30), anchor='center')
+        self.result_field.grid(row=0, column=0, columnspan=2, sticky=E+W+N+S)
+
+        img = ImageTk.PhotoImage(Image.open('assets/placeholder_plot.png'))
+        self.plot_image = ttk.Label(self.frame, anchor='center')
+        self.plot_image.configure(image=img)
+        self.plot_image.image = img
+        self.plot_image.grid(row=1, column=0, columnspan=2, sticky=E+W+N+S)
+
+        min_x_label = ttk.Label(self.frame, text='Min x:', anchor='sw')
+        min_x_label.grid(row=2, column=0, sticky=E+W+N+S)
+        max_x_label = ttk.Label(self.frame, text='Max x:', anchor='s')
+        max_x_label.grid(row=2, column=1, sticky=E+W+N+S)
+        self.min_x_entry_field = ttk.Entry(self.frame, font=('Arial', 20))
+        self.min_x_entry_field.grid(row=3, column=0, sticky=E+W+N+S)
+        self.max_x_entry_field = ttk.Entry(self.frame, font=('Arial', 20))
+        self.max_x_entry_field.grid(row=3, column=1, sticky=E+W+N+S)
+
+        self.label = ttk.Label(self.frame, text='Enter a function of x:', anchor='sw')
+        self.label.grid(row=4, column=0, columnspan=2, sticky=E+W+N+S)
+        self.entry_field = ttk.Entry(self.frame, font=('Arial', 20))
+        self.entry_field.grid(row=5, column=0, columnspan=2, sticky=E+W+N+S)
+
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.frame.columnconfigure(0, weight=1)
+        self.frame.columnconfigure(1, weight=1)
+        self.frame.rowconfigure(1, weight=1)
 
         self.entry_field.bind('<Return>', self.evaluate)
         self.entry_field.focus()
@@ -90,7 +136,7 @@ class Application(Frame):
     def evaluate(self, _):
         input = self.entry_field.get()
 
-        result = ''
+        result, file_path = '', None
         try:
             match self.mode:
                 case Mode.Calculator:
@@ -100,11 +146,14 @@ class Application(Frame):
                 case Mode.Scientific:
                     result = scientific(input) + '\n'
                 case Mode.Plot:
-                    result = plot(input)
+                    min_x = self.min_x_entry_field.get()
+                    max_x = self.max_x_entry_field.get()
+                    result, file_path = plot(min_x, max_x, input)
                 case Mode.Conversion:
                     result = convert(input)
         except Exception as e:
             result = str(e)
+            print(result)
         
         match self.mode:
             case Mode.Calculator:
@@ -114,8 +163,11 @@ class Application(Frame):
             case Mode.Scientific:
                 self.result_field['text'] = f'\n{result}\n'
             case Mode.Plot:
-                # TODO
-                pass
+                self.result_field['text'] = f'\n{result}' if not '\n' in result else result
+                if file_path:
+                    img = ImageTk.PhotoImage(Image.open(file_path))
+                    self.plot_image.configure(image=img)
+                    self.plot_image.image = img
             case Mode.Conversion:
                 # TODO
                 pass
@@ -123,7 +175,7 @@ class Application(Frame):
 if __name__ == '__main__':
     root = ThemedTk(className='Math GUI', theme='equilux')
     # Set favicon
-    img = Image("photo", file='assets/calculator_icon.png')
+    img = TkImage("photo", file='assets/calculator_icon.png')
     root.iconphoto(True, img)
 
     root.geometry('800x300')
