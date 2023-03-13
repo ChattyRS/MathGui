@@ -28,11 +28,15 @@ def dark_title_bar(window):
                          ct.sizeof(value))
 
 class Application(Frame):
-    def __init__(self, master=None):
+    def __init__(self, master: ThemedTk):
         super().__init__(master)
         self.master = master
         self.frame = None
         self.create_menu()
+
+        # Entry style to highlight selection
+        ttk.Style().configure('TEntry', selectbackground='#002c5e')
+
         self.set_mode(Mode.Calculator)
 
     def create_menu(self):
@@ -88,7 +92,6 @@ class Application(Frame):
         self.master.rowconfigure(0, weight=1)
         self.frame.columnconfigure(0, weight=1)
         self.frame.rowconfigure(0, weight=1)
-        self.frame.rowconfigure(2, weight=1)
 
         self.entry_field.bind('<Return>', self.evaluate)
         self.entry_field.focus()
