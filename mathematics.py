@@ -402,7 +402,7 @@ def calculate_expression(*formulas) -> str:
     Rounding: round(), floor(), ceil()
     Trigonometry: sin(), cos(), tan() (in radians)
     Parentheses: ()
-    Constants: pi, e, phi, tau, etc...
+    Constants: pi, e, phi, tau, alpha, gamma, delta, theta, lambda, psi, rho
     Complex/imaginary numbers: i
     Infinity: inf
     Sum: sum(start, end, f(x)) (start and end inclusive)
@@ -436,8 +436,7 @@ def plot(start: float, end: float, *formulas) -> Tuple[str, str]:
     Rounding: round(), floor(), ceil()
     Trigonometry: sin(), cos(), tan() (in radians)
     Parentheses: ()
-    Constants: pi, e, phi, tau, etc...
-    Example: graph -10 10 x
+    Constants: pi, e, phi, tau, alpha, gamma, delta, theta, lambda, psi, rho
     '''
     formula = ' '.join(formulas).strip()
     if not is_float(start) or not is_float(end):
@@ -490,7 +489,7 @@ def solve(*formulas) -> str:
     Square roots: sqrt()
     Logarithms: log() (base e)
     Parentheses: ()
-    Constants: pi, e, phi, tau, etc...
+    Constants: pi, e, phi, tau, alpha, gamma, delta, theta, lambda, psi, rho
     Trigonometry: sin(), cos(), tan() (in radians)
     Complex/imaginary numbers: i
     '''
@@ -601,7 +600,7 @@ def get_units() -> str:
         if prev:
             if unit in prev:
                 txt += ', '
-            else:
+            elif txt:
                 txt += '\n'
         txt += unit
         prev = units[unit]
