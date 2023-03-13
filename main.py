@@ -45,7 +45,7 @@ class Application(Frame):
         modeMenu.add_command(label='Solve for x', command=partial(self.set_mode, Mode.Solve))
         modeMenu.add_command(label='Scientific notation', command=partial(self.set_mode, Mode.Scientific))
         modeMenu.add_command(label='Plot', command=partial(self.set_mode, Mode.Plot))
-        # modeMenu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
+        modeMenu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
         menu.add_cascade(label='Mode', menu=modeMenu)
     
     def set_mode(self, mode: Mode):
@@ -63,8 +63,7 @@ class Application(Frame):
             case Mode.Plot:
                 self.create_plot_widgets()
             case Mode.Conversion:
-                # TODO
-                pass
+                self.create_conversion_widgets()
 
     def create_calculator_widgets(self):
         self.frame = Frame(self.master)
@@ -131,6 +130,40 @@ class Application(Frame):
         self.frame.rowconfigure(1, weight=1)
 
         self.entry_field.bind('<Return>', self.evaluate)
+        self.min_x_entry_field.bind('<Return>', self.evaluate)
+        self.max_x_entry_field.bind('<Return>', self.evaluate)
+        self.entry_field.focus()
+
+    def create_conversion_widgets(self):
+        self.frame = Frame(self.master)
+        self.frame.grid(row=0, column=0, sticky=E+W+N+S)
+
+        self.result_field = ttk.Label(self.frame, text='\n', font=('Arial', 30), anchor='center')
+        self.result_field.grid(row=0, column=0, columnspan=2, sticky=E+W+N+S)
+
+        self.label = ttk.Label(self.frame, text='Enter the amount of the unit to convert:', anchor='sw')
+        self.label.grid(row=1, column=0, columnspan=2, sticky=E+W+N+S)
+        self.entry_field = ttk.Entry(self.frame, font=('Arial', 20))
+        self.entry_field.grid(row=2, column=0, columnspan=2, sticky=E+W+N+S)
+
+        unit_from_label = ttk.Label(self.frame, text='Unit from:', anchor='sw')
+        unit_from_label.grid(row=3, column=0, sticky=E+W+N+S)
+        unit_to_label = ttk.Label(self.frame, text='Unit to:', anchor='s')
+        unit_to_label.grid(row=3, column=1, sticky=E+W+N+S)
+        self.unit_from_entry_field = ttk.Entry(self.frame, font=('Arial', 20))
+        self.unit_from_entry_field.grid(row=4, column=0, sticky=E+W+N+S)
+        self.unit_to_entry_field = ttk.Entry(self.frame, font=('Arial', 20))
+        self.unit_to_entry_field.grid(row=4, column=1, sticky=E+W+N+S)
+
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.frame.columnconfigure(0, weight=1)
+        self.frame.columnconfigure(1, weight=1)
+        self.frame.rowconfigure(0, weight=1)
+
+        self.entry_field.bind('<Return>', self.evaluate)
+        self.unit_from_entry_field.bind('<Return>', self.evaluate)
+        self.unit_to_entry_field.bind('<Return>', self.evaluate)
         self.entry_field.focus()
     
     def evaluate(self, _):
@@ -150,7 +183,9 @@ class Application(Frame):
                     max_x = self.max_x_entry_field.get()
                     result, file_path = plot(min_x, max_x, input)
                 case Mode.Conversion:
-                    result = convert(input)
+                    unit_from = self.unit_from_entry_field.get()
+                    unit_to = self.unit_to_entry_field.get()
+                    result = convert(input, unit_from, unit_to)
         except Exception as e:
             result = str(e)
             print(result)
@@ -169,8 +204,7 @@ class Application(Frame):
                     self.plot_image.configure(image=img)
                     self.plot_image.image = img
             case Mode.Conversion:
-                # TODO
-                pass
+                self.result_field['text'] = f'\n{result}\n'
 
 if __name__ == '__main__':
     root = ThemedTk(className='Math GUI', theme='equilux')

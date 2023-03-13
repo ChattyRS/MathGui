@@ -408,13 +408,9 @@ def calculate_expression(*formulas) -> str:
     Sum: sum(start, end, f(x)) (start and end inclusive)
     Product: product(start, end, f(x)) (start and end inclusive)
     '''
-    
-    formula = ''
-    for f in formulas:
-        formula += f + ' '
-    formula = formula.strip()
+    formula = ' '.join(formulas).strip()
     if not formula:
-        raise ValueError(f'Required argument missing: `expression`.')
+        raise ValueError(f'Required argument missing: expression.')
     try:
         input = format_input(formula.lower(), 0)
 
@@ -443,18 +439,14 @@ def plot(start: float, end: float, *formulas) -> Tuple[str, str]:
     Constants: pi, e, phi, tau, etc...
     Example: graph -10 10 x
     '''
-    
-    formula = ''
-    for f in formulas:
-        formula += f + ' '
-    formula = formula.strip()
+    formula = ' '.join(formulas).strip()
     if not is_float(start) or not is_float(end):
-        raise ValueError(f'Invalid argument(s): `start/end`.')
+        raise ValueError(f'Invalid argument(s): start/end.')
     start, end = float(start), float(end)
     if start >= end:
-        raise ValueError(f'Invalid arguments: `start`, `end`.')
+        raise ValueError(f'Invalid arguments: start, end.')
     if not formula:
-        raise ValueError(f'Required argument missing: `formula`.')
+        raise ValueError(f'Required argument missing: formula.')
     try:
         input = format_input(formula.lower(), 1)
 
@@ -502,13 +494,9 @@ def solve(*formulas) -> str:
     Trigonometry: sin(), cos(), tan() (in radians)
     Complex/imaginary numbers: i
     '''
-    
-    formula = ''
-    for f in formulas:
-        formula += f + ' '
-    formula = formula.strip()
+    formula = ' '.join(formulas).strip()
     if not formula:
-        raise ValueError(f'Required argument missing: `formula`.')
+        raise ValueError(f'Required argument missing: formula.')
     try:
         input = format_input(formula.lower(), 2)
 
@@ -535,16 +523,15 @@ def solve(*formulas) -> str:
         
         return f'{output}'
     except Exception as e:
-        raise ValueError(f'Invalid mathematical expression:\n```{e}```')
+        raise ValueError(f'Invalid mathematical expression:\n{e}')
 
 def convert(value='', unit='', new_unit='') -> str:
     '''
     Converts given unit to new unit.
     Default value = 1
     '''
-
     if not value or not unit:
-        raise ValueError(f'Required argument(s) missing: `value/unit`.')
+        raise ValueError(f'Required argument(s) missing: value/unit.')
     elif not new_unit:
         new_unit = unit
         unit = value
@@ -554,18 +541,18 @@ def convert(value='', unit='', new_unit='') -> str:
     new_unit = new_unit.lower().replace(' ', '')
 
     if not is_float(value):
-        raise ValueError(f'Invalid argument: `{value}`.')
+        raise ValueError(f'Invalid argument: {value}.')
     elif is_int(value):
         value = int(value)
     else:
         value = float(value)
 
     if value > sys.maxsize:
-        raise ValueError(f'Invalid argument: `{value}`. This value is too high.')
+        raise ValueError(f'Invalid argument: {value}. This value is too high.')
 
     if not unit in units:
         if not any(unit in alias for alias in unit_aliases):
-            raise ValueError(f'Invalid argument: `{unit}`.')
+            raise ValueError(f'Invalid argument: {unit}.')
         else:
             unit = get_alias(unit)
 
@@ -575,14 +562,14 @@ def convert(value='', unit='', new_unit='') -> str:
         factor = conversion_units[new_unit]
     else:
         if not any(new_unit in alias for alias in unit_aliases):
-            raise ValueError(f'Invalid argument: `{new_unit}`.')
+            raise ValueError(f'Invalid argument: {new_unit}.')
         else:
             new_unit = get_alias(new_unit)
             if new_unit in conversion_units:
                 factor = conversion_units[new_unit]
             else:
                 if not any(unit in alias for alias in unit_aliases):
-                    raise ValueError(f'Incompatible units: `{unit}`, `{new_unit}`.')
+                    raise ValueError(f'Incompatible units: {unit}, {new_unit}.')
                 else:
                     unit = get_alias(unit)
                     conversion_units = units[unit]
@@ -593,13 +580,14 @@ def convert(value='', unit='', new_unit='') -> str:
                         if new_unit in conversion_units:
                             factor = conversion_units[new_unit]
                         else:
-                            raise ValueError(f'Incompatible units: `{unit}`, `{new_unit}`.')
+                            raise ValueError(f'Incompatible units: {unit}, {new_unit}.')
 
     if isinstance(factor, int) or isinstance(factor, float):
         new_value = value * factor
     else:
         new_value = eval(f'{value}{factor}')
-    new_value = str(new_value).replace('e', ' • 10^').replace('+', '')
+    new_value = format_output(new_value)
+    new_value = new_value.replace('e', ' • 10^').replace('+', '')
 
     return f'{value} {unit} = {new_value} {new_unit}'
 
@@ -607,7 +595,6 @@ def get_units() -> str:
     '''
     List of units supported by convert command.
     '''
-
     txt = ''
     prev = [None]
     for unit in units:
@@ -625,7 +612,6 @@ def scientific(*number) -> str:
     '''
     Convert a number literal to scientific notation and vice versa.
     '''
-
     if not number:
         raise ValueError('No input. Please give a number literal as argument.')
     
@@ -640,16 +626,16 @@ def scientific(*number) -> str:
         num = input[:input.index('e')]
         exp = input[input.index('e')+1:]
         if not is_float(num) or not is_float(exp):
-            raise ValueError(f'Invalid input: `{input}`. Please give a number literal as argument.')
+            raise ValueError(f'Invalid input: {input}. Please give a number literal as argument.')
         num, exp = float(num), float(exp)
         try:
             result = num * (10**exp)
         except Exception as e:
-            raise ValueError(f'Invalid input: `{input}`. Error: {e}')
+            raise ValueError(f'Invalid input: {input}. Error: {e}')
         output = float_to_formatted_string(result)
     else: # convert from number literal to scientific notation
         if not is_float(input):
-            raise ValueError(f'Invalid input: `{input}`. Please give a number literal as argument.')
+            raise ValueError(f'Invalid input: {input}. Please give a number literal as argument.')
 
         # Calculate result
         num = input if '.' in input else input + '.0'
