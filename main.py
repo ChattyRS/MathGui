@@ -5,13 +5,13 @@ from tkinter import Image as TkImage
 from tkinter import ttk
 from ttkthemes import ThemedTk
 import ctypes as ct
-from mathematics import calculate_expression, plot, solve, convert, scientific, get_units, get_random_primes
+from mathematics import calculate_expression, plot, solve, convert, scientific, get_units, get_random_primes, prime_factorization
 from enum import Enum
 from PIL import ImageTk, Image
 import webbrowser
 import pyperclip
 
-Mode = Enum('Mode', 'Calculator Solve Scientific Plot Conversion Primes')
+Mode = Enum('Mode', 'Calculator Solve Scientific Plot Conversion Primes Factoring')
 
 def create_themed_window(root=False) -> ThemedTk:
     '''
@@ -88,6 +88,7 @@ class Application(Frame):
         modeMenu.add_command(label='Plot', command=partial(self.set_mode, Mode.Plot))
         modeMenu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
         modeMenu.add_command(label='Prime generator', command=partial(self.set_mode, Mode.Primes))
+        modeMenu.add_command(label='Prime factorization', command=partial(self.set_mode, Mode.Factoring))
         menu.add_cascade(label='Mode', menu=modeMenu)
 
         helpMenu = Menu(menu, background='#464646', foreground='#a6a6a6', tearoff=False)
@@ -114,6 +115,8 @@ class Application(Frame):
                 self.create_conversion_widgets()
             case Mode.Primes:
                 self.create_prime_widgets()
+            case Mode.Factoring:
+                self.create_calculator_widgets()
     
     def show_help(self):
         match self.mode:
@@ -130,6 +133,8 @@ class Application(Frame):
                 help_text += f'\n\nSupported units:\n{get_units()}'
             case Mode.Primes:
                 help_text = inspect.getdoc(get_random_primes)
+            case Mode.Factoring:
+                help_text = inspect.getdoc(prime_factorization)
         help_root = create_themed_window()
         HelpWindow(help_root, help_text)
 
@@ -147,7 +152,10 @@ class Application(Frame):
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)
 
         self.result_field = ttk.Label(self.frame, text='\n\n\n', font=('Arial', 30), anchor='center')
-        self.result_field.grid(row=0, column=0, sticky=E+W+N+S)
+        self.result_field.grid(row=0, column=0, rowspan=2, columnspan=2, sticky=E+W+N+S)
+
+        self.copy_button = ttk.Button(self.frame, text='Copy', command=self.to_clipboard)
+        self.copy_button.grid(row=1, column=1, sticky=E+W+N+S)
 
         match self.mode:
             case Mode.Calculator:
@@ -156,10 +164,13 @@ class Application(Frame):
                 self.label = ttk.Label(self.frame, text='Enter an equality for x:', anchor='sw')
             case Mode.Scientific:
                 self.label = ttk.Label(self.frame, text='Enter a value in normal or scientific notation:', anchor='sw')
+            case Mode.Factoring:
+                self.label = ttk.Label(self.frame, text='Enter an integer:', anchor='sw')
         
-        self.label.grid(row=1, column=0, sticky=E+W+N+S)
+        self.label.grid(row=2, column=0, columnspan=2, sticky=E+W+N+S)
+
         self.entry_field = ttk.Entry(self.frame, font=('Arial', 20))
-        self.entry_field.grid(row=2, column=0, sticky=E+W+N+S)
+        self.entry_field.grid(row=3, column=0, columnspan=2, sticky=E+W+N+S)
 
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
@@ -229,22 +240,25 @@ class Application(Frame):
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)
 
         self.result_field = ttk.Label(self.frame, text='\n', font=('Arial', 30), anchor='center')
-        self.result_field.grid(row=0, column=0, columnspan=2, sticky=E+W+N+S)
+        self.result_field.grid(row=0, column=0, columnspan=2, rowspan=2, sticky=E+W+N+S)
+
+        self.copy_button = ttk.Button(self.frame, text='Copy', command=self.to_clipboard)
+        self.copy_button.grid(row=1, column=1, sticky=E+W+N+S)
 
         self.label = ttk.Label(self.frame, text='Enter the amount of the unit to convert:', anchor='sw')
-        self.label.grid(row=1, column=0, columnspan=2, sticky=E+W+N+S)
+        self.label.grid(row=2, column=0, columnspan=2, sticky=E+W+N+S)
         self.entry_field = ttk.Entry(self.frame, font=('Arial', 20))
         self.entry_field.insert(0, '1')
-        self.entry_field.grid(row=2, column=0, columnspan=2, sticky=E+W+N+S)
+        self.entry_field.grid(row=3, column=0, columnspan=2, sticky=E+W+N+S)
 
         unit_from_label = ttk.Label(self.frame, text='Unit from:', anchor='sw')
-        unit_from_label.grid(row=3, column=0, sticky=E+W+N+S)
+        unit_from_label.grid(row=4, column=0, sticky=E+W+N+S)
         unit_to_label = ttk.Label(self.frame, text='Unit to:', anchor='sw')
-        unit_to_label.grid(row=3, column=1, sticky=E+W+N+S)
+        unit_to_label.grid(row=4, column=1, sticky=E+W+N+S)
         self.unit_from_entry_field = ttk.Entry(self.frame, font=('Arial', 20))
-        self.unit_from_entry_field.grid(row=4, column=0, sticky=E+W+N+S)
+        self.unit_from_entry_field.grid(row=5, column=0, sticky=E+W+N+S)
         self.unit_to_entry_field = ttk.Entry(self.frame, font=('Arial', 20))
-        self.unit_to_entry_field.grid(row=4, column=1, sticky=E+W+N+S)
+        self.unit_to_entry_field.grid(row=5, column=1, sticky=E+W+N+S)
 
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
@@ -299,7 +313,9 @@ class Application(Frame):
         self.entry_field.focus()
     
     def to_clipboard(self):
-        to_copy = self.result_field['text'].strip()
+        to_copy = self.result_field['text'].split('=')[-1].strip() if len(self.result_field['text'].split('=')) <= 2 else self.result_field['text'].strip()
+        to_copy = to_copy.replace('𝓍', 'x')
+        to_copy = to_copy.replace('•', '*')
         pyperclip.copy(to_copy)
     
     def evaluate(self, _):
@@ -326,6 +342,8 @@ class Application(Frame):
                     num_of_primes = self.number_of_primes_field.get()
                     file_type = self.var_file_type.get()
                     result = get_random_primes(num_of_primes, file_type, input)
+                case Mode.Factoring:
+                    result = prime_factorization(input) + '\n'
         except Exception as e:
             result = str(e)
             print(result)
@@ -349,6 +367,8 @@ class Application(Frame):
             case Mode.Conversion:
                 self.result_field['text'] = f'\n{result}\n'
             case Mode.Primes:
+                self.result_field['text'] = f'\n{result}\n'
+            case Mode.Factoring:
                 self.result_field['text'] = f'\n{result}\n'
 
 if __name__ == '__main__':

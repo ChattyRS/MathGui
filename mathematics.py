@@ -696,3 +696,20 @@ def get_random_primes(num: str, file_type: str, input: str) -> str:
         file.close()
 
     return str(primes[0]) if num <= 1 else f'{num} primes written to\n{file_name}'
+
+def prime_factorization(input: str) -> str:
+    '''
+    Calculates the prime factorization of the given integer.
+    '''
+    input = input.strip()
+    if not input:
+        raise ValueError('No input. Please give a number literal as argument.')
+    if not is_int(input) or int(input) < 2:
+        raise ValueError('Invalid input. Please give a number literal as argument.')
+    input = int(input)
+
+    factors = sympy.factorint(input)
+
+    output = ' • '.join([str(factor) + (f'^{factors[factor]}' if factors[factor] > 1 else '') for factor in factors])
+
+    return output
