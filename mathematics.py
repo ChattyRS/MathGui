@@ -471,7 +471,7 @@ def plot(start: float, end: float, formula: str) -> Tuple[str, str]:
         ax.yaxis.grid()
         ax.xaxis.grid()
         plt.xlim(start, end)
-        file_name = f'images/plot_{datetime.utcnow().strftime("%Y-%m-%d_%H%M%S%f")}.png'
+        file_name = f'output/images/plot_{datetime.utcnow().strftime("%Y-%m-%d_%H%M%S%f")}.png'
         plt.savefig(file_name, facecolor=fig.get_facecolor(), dpi=300)
         plt.close(fig)
 
@@ -659,10 +659,23 @@ def scientific(input: str) -> str:
     else:
         raise ValueError(f'Error: output exceeds character limit.')
     
-def get_random_prime(input: str) -> str:
+def get_random_primes(num: str, file_type: str, input: str) -> str:
     '''
     Generates a random prime number of given length.
     '''
+    num = num.strip()
+    if not num:
+        raise ValueError('No number. Please give a number literal as argument.')
+    if not is_int(num) or int(num) < 1:
+        raise ValueError('Invalid number. Please give a number literal as argument.')
+    num = int(num)
+
+    file_type = file_type.strip()
+    if not file_type:
+        raise ValueError('No file type. Please give a file type as argument.')
+    if not file_type in ['.txt', '.csv']:
+        raise ValueError('Invalid file type. Please choose between .txt and .csv.')
+
     input = input.strip()
     if not input:
         raise ValueError('No input. Please give a number literal as argument.')
@@ -672,5 +685,14 @@ def get_random_prime(input: str) -> str:
 
     start = int('1' + '0'*(length-1))
     end = int('1' + '0'*(length))
-    prime = sympy.randprime(start, end)
-    return str(prime)
+
+    primes = [sympy.randprime(start, end) for _ in range(num)]
+
+    if num > 1:
+        file_name = f'output/primes_{datetime.utcnow().strftime("%Y-%m-%d_%H%M%S%f")}{file_type}'
+        file = open(file_name, "w", encoding='utf-8')
+        for prime in primes:
+            file.write(str(prime) + (',' if file_type == '.csv' else '') + '\n')
+        file.close()
+
+    return str(primes[0]) if num <= 1 else f'{num} primes written to\n{file_name}'

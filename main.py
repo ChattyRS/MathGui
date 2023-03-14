@@ -5,7 +5,7 @@ from tkinter import Image as TkImage
 from tkinter import ttk
 from ttkthemes import ThemedTk
 import ctypes as ct
-from mathematics import calculate_expression, plot, solve, convert, scientific, get_units, get_random_prime
+from mathematics import calculate_expression, plot, solve, convert, scientific, get_units, get_random_primes
 from enum import Enum
 from PIL import ImageTk, Image
 import webbrowser
@@ -140,6 +140,9 @@ class Application(Frame):
         webbrowser.open('https://discord.gg/Pcbz2HH')
 
     def create_calculator_widgets(self):
+        if self.master.winfo_width() < 1000 or self.master.winfo_height() < 400:
+            self.master.geometry('1000x400')
+            
         self.frame = Frame(self.master)
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)
 
@@ -219,6 +222,9 @@ class Application(Frame):
         self.plot_image.create_image(0, 0, image=self.plot_resized, anchor='nw', tags='IMG')
 
     def create_conversion_widgets(self):
+        if self.master.winfo_width() < 1000 or self.master.winfo_height() < 400:
+            self.master.geometry('1000x400')
+
         self.frame = Frame(self.master)
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)
 
@@ -252,6 +258,9 @@ class Application(Frame):
         self.entry_field.focus()
 
     def create_prime_widgets(self):
+        if self.master.winfo_width() < 1000 or self.master.winfo_height() < 400:
+            self.master.geometry('1000x400')
+
         self.frame = Frame(self.master)
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)
 
@@ -267,12 +276,26 @@ class Application(Frame):
         self.entry_field = ttk.Entry(self.frame, font=('Arial', 20))
         self.entry_field.grid(row=3, column=0, columnspan=2, sticky=E+W+N+S)
 
+        self.file_types = ['.txt', '.csv']
+        self.var_file_type = StringVar(value=self.file_types[0])
+        for i, v in enumerate(self.file_types):
+            file_type_field = ttk.Radiobutton(self.frame, text=v, value=v, variable=self.var_file_type)
+            file_type_field.grid(row=4+i, column=1, sticky=E+W+N+S)
+
+        self.number_of_primes_label = ttk.Label(self.frame, text='Number primes to generate (output will be written to file in output folder when > 1):', anchor='sw')
+        self.number_of_primes_label.grid(row=4, column=0, sticky=E+W+N+S)
+
+        self.number_of_primes_field = ttk.Entry(self.frame, font=('Arial', 20))
+        self.number_of_primes_field.grid(row=5, column=0, sticky=E+W+N+S)
+        self.number_of_primes_field.insert(0, '1')
+
         self.master.columnconfigure(0, weight=1)
         self.master.rowconfigure(0, weight=1)
         self.frame.columnconfigure(0, weight=1)
         self.frame.rowconfigure(0, weight=1)
 
         self.entry_field.bind('<Return>', self.evaluate)
+        self.number_of_primes_field.bind('<Return>', self.evaluate)
         self.entry_field.focus()
     
     def to_clipboard(self):
@@ -300,7 +323,9 @@ class Application(Frame):
                     unit_to = self.unit_to_entry_field.get()
                     result = convert(input, unit_from, unit_to)
                 case Mode.Primes:
-                    result = get_random_prime(input)
+                    num_of_primes = self.number_of_primes_field.get()
+                    file_type = self.var_file_type.get()
+                    result = get_random_primes(num_of_primes, file_type, input)
         except Exception as e:
             result = str(e)
             print(result)
@@ -328,7 +353,7 @@ class Application(Frame):
 
 if __name__ == '__main__':
     root = create_themed_window(True)
-    root.geometry('800x300')
+    root.geometry('1000x400')
     
     app = Application(master=root)
     app.mainloop()
