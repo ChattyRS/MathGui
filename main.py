@@ -207,7 +207,7 @@ class Application(Frame):
 
     def resize(self, event):
         size = (event.width, event.height)
-        resized = self.plot_original.resize(size, Image.ANTIALIAS)
+        resized = self.plot_original.resize(size, Image.LANCZOS)
         self.plot_resized = ImageTk.PhotoImage(resized)
         self.plot_image.delete("IMG")
         self.plot_image.create_image(0, 0, image=self.plot_resized, anchor='nw', tags='IMG')
@@ -281,7 +281,7 @@ class Application(Frame):
                 if file_path:
                     self.plot_original = Image.open(file_path)
                     size = (self.plot_resized.width(), self.plot_resized.height())
-                    resized = self.plot_original.resize(size, Image.ANTIALIAS)
+                    resized = self.plot_original.resize(size, Image.LANCZOS)
                     self.plot_resized = ImageTk.PhotoImage(resized)
                     self.plot_image.delete("IMG")
                     self.plot_image.create_image(0, 0, image=self.plot_resized, anchor='nw', tags='IMG')
