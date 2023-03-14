@@ -472,7 +472,7 @@ def plot(start: float, end: float, *formulas) -> Tuple[str, str]:
         ax.xaxis.grid()
         plt.xlim(start, end)
         file_name = f'images/plot_{datetime.utcnow().strftime("%Y-%m-%d_%H%M%S%f")}.png'
-        plt.savefig(file_name, facecolor=fig.get_facecolor())
+        plt.savefig(file_name, facecolor=fig.get_facecolor(), dpi=300)
         plt.close(fig)
 
         formula = beautify_input(formula)

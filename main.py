@@ -170,20 +170,23 @@ class Application(Frame):
         self.result_field = ttk.Label(self.frame, text='\n', font=('Arial', 30), anchor='center')
         self.result_field.grid(row=0, column=0, columnspan=2, sticky=E+W+N+S)
 
-        img = ImageTk.PhotoImage(Image.open('assets/placeholder_plot.png'))
-        self.plot_image = ttk.Label(self.frame, anchor='center')
-        self.plot_image.configure(image=img)
-        self.plot_image.image = img
+        self.plot_original = Image.open('assets/placeholder_plot.png')
+        self.plot_resized = ImageTk.PhotoImage(self.plot_original)
+        self.plot_image = Canvas(self.frame, border=0, highlightthickness=0)
+        self.plot_image.create_image(0, 0, image=self.plot_resized, anchor='nw', tags='IMG')
+        self.plot_image.grid(row=0, sticky=W+E+N+S)
         self.plot_image.grid(row=1, column=0, columnspan=2, sticky=E+W+N+S)
 
         min_x_label = ttk.Label(self.frame, text='Min x:', anchor='sw')
         min_x_label.grid(row=2, column=0, sticky=E+W+N+S)
-        max_x_label = ttk.Label(self.frame, text='Max x:', anchor='s')
+        max_x_label = ttk.Label(self.frame, text='Max x:', anchor='sw')
         max_x_label.grid(row=2, column=1, sticky=E+W+N+S)
         self.min_x_entry_field = ttk.Entry(self.frame, font=('Arial', 20))
         self.min_x_entry_field.grid(row=3, column=0, sticky=E+W+N+S)
+        self.min_x_entry_field.insert(0, '-10')
         self.max_x_entry_field = ttk.Entry(self.frame, font=('Arial', 20))
         self.max_x_entry_field.grid(row=3, column=1, sticky=E+W+N+S)
+        self.max_x_entry_field.insert(0, '10')
 
         self.label = ttk.Label(self.frame, text='Enter a function of x:', anchor='sw')
         self.label.grid(row=4, column=0, columnspan=2, sticky=E+W+N+S)
@@ -199,7 +202,15 @@ class Application(Frame):
         self.entry_field.bind('<Return>', self.evaluate)
         self.min_x_entry_field.bind('<Return>', self.evaluate)
         self.max_x_entry_field.bind('<Return>', self.evaluate)
+        self.plot_image.bind("<Configure>", self.resize)
         self.entry_field.focus()
+
+    def resize(self, event):
+        size = (event.width, event.height)
+        resized = self.plot_original.resize(size, Image.ANTIALIAS)
+        self.plot_resized = ImageTk.PhotoImage(resized)
+        self.plot_image.delete("IMG")
+        self.plot_image.create_image(0, 0, image=self.plot_resized, anchor='nw', tags='IMG')
 
     def create_conversion_widgets(self):
         self.frame = Frame(self.master)
@@ -216,7 +227,7 @@ class Application(Frame):
 
         unit_from_label = ttk.Label(self.frame, text='Unit from:', anchor='sw')
         unit_from_label.grid(row=3, column=0, sticky=E+W+N+S)
-        unit_to_label = ttk.Label(self.frame, text='Unit to:', anchor='s')
+        unit_to_label = ttk.Label(self.frame, text='Unit to:', anchor='sw')
         unit_to_label.grid(row=3, column=1, sticky=E+W+N+S)
         self.unit_from_entry_field = ttk.Entry(self.frame, font=('Arial', 20))
         self.unit_from_entry_field.grid(row=4, column=0, sticky=E+W+N+S)
@@ -268,9 +279,12 @@ class Application(Frame):
             case Mode.Plot:
                 self.result_field['text'] = f'\n{result}' if not '\n' in result else result
                 if file_path:
-                    img = ImageTk.PhotoImage(Image.open(file_path))
-                    self.plot_image.configure(image=img)
-                    self.plot_image.image = img
+                    self.plot_original = Image.open(file_path)
+                    size = (self.plot_resized.width(), self.plot_resized.height())
+                    resized = self.plot_original.resize(size, Image.ANTIALIAS)
+                    self.plot_resized = ImageTk.PhotoImage(resized)
+                    self.plot_image.delete("IMG")
+                    self.plot_image.create_image(0, 0, image=self.plot_resized, anchor='nw', tags='IMG')
             case Mode.Conversion:
                 self.result_field['text'] = f'\n{result}\n'
 
