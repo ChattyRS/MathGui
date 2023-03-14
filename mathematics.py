@@ -388,7 +388,7 @@ def plot_func(x: np.ndarray, input: str) -> dict:
         val[i] = func(i)
     return val
 
-def calculate_expression(*formulas) -> str:
+def calculate_expression(formula: str) -> str:
     '''
     Calculates the result of a given mathematical problem.
     Supported operations:
@@ -408,7 +408,7 @@ def calculate_expression(*formulas) -> str:
     Sum: sum(start, end, f(x)) (start and end inclusive)
     Product: product(start, end, f(x)) (start and end inclusive)
     '''
-    formula = ' '.join(formulas).strip()
+    formula = formula.strip()
     if not formula:
         raise ValueError(f'Required argument missing: expression.')
     try:
@@ -422,7 +422,7 @@ def calculate_expression(*formulas) -> str:
     except Exception as e:
         raise ValueError(f'Invalid mathematical expression:\n{e}')
 
-def plot(start: float, end: float, *formulas) -> Tuple[str, str]:
+def plot(start: float, end: float, formula: str) -> Tuple[str, str]:
     '''
     Plots a given mathematical function
     Arguments: start, end, f(x)
@@ -438,7 +438,7 @@ def plot(start: float, end: float, *formulas) -> Tuple[str, str]:
     Parentheses: ()
     Constants: pi, e, phi, tau, alpha, gamma, delta, theta, lambda, psi, rho
     '''
-    formula = ' '.join(formulas).strip()
+    formula = formula.strip()
     if not is_float(start) or not is_float(end):
         raise ValueError(f'Invalid argument(s): start/end.')
     start, end = float(start), float(end)
@@ -480,7 +480,7 @@ def plot(start: float, end: float, *formulas) -> Tuple[str, str]:
     except Exception as e:
         raise ValueError(f'Invalid mathematical expression:\n{e}')
 
-def solve(*formulas) -> str:
+def solve(formula: str) -> str:
     '''
     Solves a given equation for x.
     Supported operations:
@@ -493,7 +493,7 @@ def solve(*formulas) -> str:
     Trigonometry: sin(), cos(), tan() (in radians)
     Complex/imaginary numbers: i
     '''
-    formula = ' '.join(formulas).strip()
+    formula = formula.strip()
     if not formula:
         raise ValueError(f'Required argument missing: formula.')
     try:
@@ -607,14 +607,13 @@ def get_units() -> str:
 
     return f'{txt}'
 
-def scientific(*number) -> str:
+def scientific(input: str) -> str:
     '''
     Convert a number literal to scientific notation and vice versa.
     '''
-    if not number:
+    input = input.strip()
+    if not input:
         raise ValueError('No input. Please give a number literal as argument.')
-    
-    input = ' '.join(number)
 
     input = input.replace(' ', '').replace(',', '')
     input = input.replace('*10^', 'e')
@@ -659,3 +658,19 @@ def scientific(*number) -> str:
         return f'{output}'
     else:
         raise ValueError(f'Error: output exceeds character limit.')
+    
+def get_random_prime(input: str) -> str:
+    '''
+    Generates a random prime number of given length.
+    '''
+    input = input.strip()
+    if not input:
+        raise ValueError('No input. Please give a number literal as argument.')
+    if not is_int(input):
+        raise ValueError('Invalid input. Please give a number literal as argument.')
+    length = int(input)
+
+    start = int('1' + '0'*(length-1))
+    end = int('1' + '0'*(length))
+    prime = sympy.randprime(start, end)
+    return str(prime)

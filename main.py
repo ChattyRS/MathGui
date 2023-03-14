@@ -5,12 +5,13 @@ from tkinter import Image as TkImage
 from tkinter import ttk
 from ttkthemes import ThemedTk
 import ctypes as ct
-from mathematics import calculate_expression, plot, solve, convert, scientific, get_units
+from mathematics import calculate_expression, plot, solve, convert, scientific, get_units, get_random_prime
 from enum import Enum
 from PIL import ImageTk, Image
 import webbrowser
+import pyperclip
 
-Mode = Enum('Mode', 'Calculator Solve Scientific Plot Conversion')
+Mode = Enum('Mode', 'Calculator Solve Scientific Plot Conversion Primes')
 
 def create_themed_window(root=False) -> ThemedTk:
     '''
@@ -86,6 +87,7 @@ class Application(Frame):
         modeMenu.add_command(label='Scientific notation', command=partial(self.set_mode, Mode.Scientific))
         modeMenu.add_command(label='Plot', command=partial(self.set_mode, Mode.Plot))
         modeMenu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
+        modeMenu.add_command(label='Prime generator', command=partial(self.set_mode, Mode.Primes))
         menu.add_cascade(label='Mode', menu=modeMenu)
 
         helpMenu = Menu(menu, background='#464646', foreground='#a6a6a6', tearoff=False)
@@ -110,6 +112,8 @@ class Application(Frame):
                 self.create_plot_widgets()
             case Mode.Conversion:
                 self.create_conversion_widgets()
+            case Mode.Primes:
+                self.create_prime_widgets()
     
     def show_help(self):
         match self.mode:
@@ -124,6 +128,8 @@ class Application(Frame):
             case Mode.Conversion:
                 help_text = inspect.getdoc(convert)
                 help_text += f'\n\nSupported units:\n{get_units()}'
+            case Mode.Primes:
+                help_text = inspect.getdoc(get_random_prime)
         help_root = create_themed_window()
         HelpWindow(help_root, help_text)
 
@@ -244,6 +250,34 @@ class Application(Frame):
         self.unit_from_entry_field.bind('<Return>', self.evaluate)
         self.unit_to_entry_field.bind('<Return>', self.evaluate)
         self.entry_field.focus()
+
+    def create_prime_widgets(self):
+        self.frame = Frame(self.master)
+        self.frame.grid(row=0, column=0, sticky=E+W+N+S)
+
+        self.result_field = ttk.Label(self.frame, text='\n\n\n', font=('Arial', 30), anchor='center')
+        self.result_field.grid(row=0, column=0, rowspan=2, columnspan=2, sticky=E+W+N+S)
+
+        self.copy_button = ttk.Button(self.frame, text='Copy', command=self.to_clipboard)
+        self.copy_button.grid(row=1, column=1, sticky=E+W+N+S)
+
+        self.label = ttk.Label(self.frame, text='Number of digits:', anchor='sw')
+        self.label.grid(row=2, column=0, columnspan=2, sticky=E+W+N+S)
+
+        self.entry_field = ttk.Entry(self.frame, font=('Arial', 20))
+        self.entry_field.grid(row=3, column=0, columnspan=2, sticky=E+W+N+S)
+
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.frame.columnconfigure(0, weight=1)
+        self.frame.rowconfigure(0, weight=1)
+
+        self.entry_field.bind('<Return>', self.evaluate)
+        self.entry_field.focus()
+    
+    def to_clipboard(self):
+        to_copy = self.result_field['text'].strip()
+        pyperclip.copy(to_copy)
     
     def evaluate(self, _):
         input = self.entry_field.get()
@@ -265,6 +299,8 @@ class Application(Frame):
                     unit_from = self.unit_from_entry_field.get()
                     unit_to = self.unit_to_entry_field.get()
                     result = convert(input, unit_from, unit_to)
+                case Mode.Primes:
+                    result = get_random_prime(input)
         except Exception as e:
             result = str(e)
             print(result)
@@ -286,6 +322,8 @@ class Application(Frame):
                     self.plot_image.delete("IMG")
                     self.plot_image.create_image(0, 0, image=self.plot_resized, anchor='nw', tags='IMG')
             case Mode.Conversion:
+                self.result_field['text'] = f'\n{result}\n'
+            case Mode.Primes:
                 self.result_field['text'] = f'\n{result}\n'
 
 if __name__ == '__main__':

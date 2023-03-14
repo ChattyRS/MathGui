@@ -25,6 +25,7 @@ Or install the following libraries manually:
 * [matplotlib](https://matplotlib.org/)
 * [SymPy](https://www.sympy.org/en/index.html)
 * [forex-python](https://github.com/MicroPyramid/forex-python)
+* [pyperclip](https://github.com/asweigart/pyperclip)
 
 ## License
 
