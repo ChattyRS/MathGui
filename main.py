@@ -10,8 +10,9 @@ from enum import Enum
 from PIL import ImageTk, Image
 import webbrowser
 import pyperclip
+from encoding import message_to_ascii_hexadecimal, message_to_ascii_decimal
 
-Mode = Enum('Mode', 'Calculator Solve Scientific Plot Conversion Primes Factoring')
+Mode = Enum('Mode', 'Calculator Solve Scientific Plot Conversion Primes Factoring ASCII')
 
 def create_themed_window(root=False) -> ThemedTk:
     '''
@@ -81,21 +82,25 @@ class Application(Frame):
         menu = Menu(self.master, background='#323233', foreground='#a6a6a6')
         self.master.config(menu=menu)
 
-        modeMenu = Menu(menu, background='#464646', foreground='#a6a6a6', tearoff=False)
-        modeMenu.add_command(label='Calculator', command=partial(self.set_mode, Mode.Calculator))
-        modeMenu.add_command(label='Solve for x', command=partial(self.set_mode, Mode.Solve))
-        modeMenu.add_command(label='Scientific notation', command=partial(self.set_mode, Mode.Scientific))
-        modeMenu.add_command(label='Plot', command=partial(self.set_mode, Mode.Plot))
-        modeMenu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
-        modeMenu.add_command(label='Prime generator', command=partial(self.set_mode, Mode.Primes))
-        modeMenu.add_command(label='Prime factorization', command=partial(self.set_mode, Mode.Factoring))
-        menu.add_cascade(label='Mode', menu=modeMenu)
+        mode_menu = Menu(menu, background='#464646', foreground='#a6a6a6', tearoff=False)
+        mode_menu.add_command(label='Calculator', command=partial(self.set_mode, Mode.Calculator))
+        mode_menu.add_command(label='Solve for x', command=partial(self.set_mode, Mode.Solve))
+        mode_menu.add_command(label='Scientific notation', command=partial(self.set_mode, Mode.Scientific))
+        mode_menu.add_command(label='Plot', command=partial(self.set_mode, Mode.Plot))
+        mode_menu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
+        mode_menu.add_command(label='Prime generator', command=partial(self.set_mode, Mode.Primes))
+        mode_menu.add_command(label='Prime factorization', command=partial(self.set_mode, Mode.Factoring))
+        menu.add_cascade(label='Mode', menu=mode_menu)
 
-        helpMenu = Menu(menu, background='#464646', foreground='#a6a6a6', tearoff=False)
-        helpMenu.add_command(label='Help', command=self.show_help)
-        helpMenu.add_command(label='GitHub', command=self.open_github_page)
-        helpMenu.add_command(label='Support (join Discord)', command=self.open_discord)
-        menu.add_cascade(label='Help', menu=helpMenu)
+        encoding_sub_menu = Menu(mode_menu, background='#464646', foreground='#a6a6a6', tearoff=False)
+        encoding_sub_menu.add_command(label='ASCII', command=partial(self.set_mode, Mode.ASCII))
+        mode_menu.add_cascade(label='Encoding', menu=encoding_sub_menu)
+
+        help_menu = Menu(menu, background='#464646', foreground='#a6a6a6', tearoff=False)
+        help_menu.add_command(label='Help', command=self.show_help)
+        help_menu.add_command(label='GitHub', command=self.open_github_page)
+        help_menu.add_command(label='Support (join Discord)', command=self.open_discord)
+        menu.add_cascade(label='Help', menu=help_menu)
     
     def set_mode(self, mode: Mode):
         self.mode = mode
@@ -117,6 +122,8 @@ class Application(Frame):
                 self.create_prime_widgets()
             case Mode.Factoring:
                 self.create_calculator_widgets()
+            case Mode.ASCII:
+                self.create_ascii_widgets()
     
     def show_help(self):
         match self.mode:
@@ -135,6 +142,8 @@ class Application(Frame):
                 help_text = inspect.getdoc(get_random_primes)
             case Mode.Factoring:
                 help_text = inspect.getdoc(prime_factorization)
+            case Mode.ASCII:
+                help_text = inspect.getdoc(message_to_ascii_hexadecimal)
         help_root = create_themed_window()
         HelpWindow(help_root, help_text)
 
@@ -311,6 +320,40 @@ class Application(Frame):
         self.entry_field.bind('<Return>', self.evaluate)
         self.number_of_primes_field.bind('<Return>', self.evaluate)
         self.entry_field.focus()
+
+    def create_ascii_widgets(self):
+        if self.master.winfo_width() < 1000 or self.master.winfo_height() < 400:
+            self.master.geometry('1000x400')
+
+        self.frame = Frame(self.master)
+        self.frame.grid(row=0, column=0, sticky=E+W+N+S)
+
+        self.encoding_bases = ['hexadecimal', 'decimal']
+
+        self.result_field = ttk.Label(self.frame, text='\n\n\n', font=('Arial', 30), anchor='center')
+        self.result_field.grid(row=0, column=0, rowspan=2+max(0, len(self.encoding_bases)-1), columnspan=3, sticky=E+W+N+S)
+        
+        self.var_encoding_base = StringVar(value=self.encoding_bases[0])
+        for i, v in enumerate(self.encoding_bases):
+            encoding_base_field = ttk.Radiobutton(self.frame, text=v, value=v, variable=self.var_encoding_base)
+            encoding_base_field.grid(row=1+i, column=0, sticky=E+W+N+S)
+
+        self.copy_button = ttk.Button(self.frame, text='Copy', command=self.to_clipboard)
+        self.copy_button.grid(row=1, column=2, sticky=E+W+N+S)
+
+        self.label = ttk.Label(self.frame, text='Enter a plaintext message:', anchor='sw')
+        self.label.grid(row=1+max(1, len(self.encoding_bases)), column=0, columnspan=3, sticky=E+W+N+S)
+
+        self.entry_field = ttk.Entry(self.frame, font=('Arial', 20))
+        self.entry_field.grid(row=2+max(1, len(self.encoding_bases)), column=0, columnspan=3, sticky=E+W+N+S)
+
+        self.master.columnconfigure(0, weight=1)
+        self.master.rowconfigure(0, weight=1)
+        self.frame.columnconfigure(0, weight=1)
+        self.frame.rowconfigure(0, weight=1)
+
+        self.entry_field.bind('<Return>', self.evaluate)
+        self.entry_field.focus()
     
     def to_clipboard(self):
         to_copy = self.result_field['text'].split('=')[-1].strip() if len(self.result_field['text'].split('=')) <= 2 else self.result_field['text'].strip()
@@ -344,6 +387,12 @@ class Application(Frame):
                     result = get_random_primes(num_of_primes, file_type, input)
                 case Mode.Factoring:
                     result = prime_factorization(input) + '\n'
+                case Mode.ASCII:
+                    match self.var_encoding_base.get():
+                        case 'hexadecimal':
+                            result = message_to_ascii_hexadecimal(input) + '\n'
+                        case 'decimal':
+                            result = str(message_to_ascii_decimal(input)) + '\n'
         except Exception as e:
             result = str(e)
             print(result)
@@ -369,6 +418,8 @@ class Application(Frame):
             case Mode.Primes:
                 self.result_field['text'] = f'\n{result}\n'
             case Mode.Factoring:
+                self.result_field['text'] = f'\n{result}\n'
+            case Mode.ASCII:
                 self.result_field['text'] = f'\n{result}\n'
 
 if __name__ == '__main__':
