@@ -129,7 +129,7 @@ class Application(Frame):
                 help_text = inspect.getdoc(convert)
                 help_text += f'\n\nSupported units:\n{get_units()}'
             case Mode.Primes:
-                help_text = inspect.getdoc(get_random_prime)
+                help_text = inspect.getdoc(get_random_primes)
         help_root = create_themed_window()
         HelpWindow(help_root, help_text)
 
@@ -142,7 +142,7 @@ class Application(Frame):
     def create_calculator_widgets(self):
         if self.master.winfo_width() < 1000 or self.master.winfo_height() < 400:
             self.master.geometry('1000x400')
-            
+
         self.frame = Frame(self.master)
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)
 
