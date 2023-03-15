@@ -4,7 +4,7 @@ def message_to_ascii_hexadecimal(plaintext: str) -> str:
     '''
     if not plaintext.isascii():
         raise ValueError('Message was not valid ASCII')
-    return ' '.join([hex(ord(char)).replace('0x', '').rjust(2, '0') for char in plaintext])
+    return ' '.join([hex(ord(char)).replace('0x', '') for char in plaintext])
 
 def message_to_ascii_decimal(plaintext: str) -> int:
     '''
@@ -12,4 +12,4 @@ def message_to_ascii_decimal(plaintext: str) -> int:
     '''
     if not plaintext.isascii():
         raise ValueError('Message was not valid ASCII')
-    return ' '.join([str(ord(char)).rjust(3, '0') for char in plaintext])
+    return ' '.join([str(ord(char)) for char in plaintext])

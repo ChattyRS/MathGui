@@ -90,11 +90,12 @@ class Application(Frame):
         mode_menu.add_command(label='Unit conversion', command=partial(self.set_mode, Mode.Conversion))
         mode_menu.add_command(label='Prime generator', command=partial(self.set_mode, Mode.Primes))
         mode_menu.add_command(label='Prime factorization', command=partial(self.set_mode, Mode.Factoring))
+        mode_menu.add_command(label='ASCII encoding', command=partial(self.set_mode, Mode.ASCII))
         menu.add_cascade(label='Mode', menu=mode_menu)
 
-        encoding_sub_menu = Menu(mode_menu, background='#464646', foreground='#a6a6a6', tearoff=False)
-        encoding_sub_menu.add_command(label='ASCII', command=partial(self.set_mode, Mode.ASCII))
-        mode_menu.add_cascade(label='Encoding', menu=encoding_sub_menu)
+        # encoding_sub_menu = Menu(mode_menu, background='#464646', foreground='#a6a6a6', tearoff=False)
+        # encoding_sub_menu.add_command(label='ASCII', command=partial(self.set_mode, Mode.ASCII))
+        # mode_menu.add_cascade(label='Encoding', menu=encoding_sub_menu)
 
         help_menu = Menu(menu, background='#464646', foreground='#a6a6a6', tearoff=False)
         help_menu.add_command(label='Help', command=self.show_help)
@@ -328,7 +329,7 @@ class Application(Frame):
         self.frame = Frame(self.master)
         self.frame.grid(row=0, column=0, sticky=E+W+N+S)
 
-        self.encoding_bases = ['hexadecimal', 'decimal']
+        self.encoding_bases = ['decimal', 'hexadecimal']
 
         self.result_field = ttk.Label(self.frame, text='\n\n\n', font=('Arial', 30), anchor='center')
         self.result_field.grid(row=0, column=0, rowspan=2+max(0, len(self.encoding_bases)-1), columnspan=3, sticky=E+W+N+S)
@@ -359,6 +360,11 @@ class Application(Frame):
         to_copy = self.result_field['text'].split('=')[-1].strip() if len(self.result_field['text'].split('=')) <= 2 else self.result_field['text'].strip()
         to_copy = to_copy.replace('𝓍', 'x')
         to_copy = to_copy.replace('•', '*')
+
+        match self.mode:
+            case Mode.ASCII:
+                to_copy = to_copy.replace(' ', '')
+
         pyperclip.copy(to_copy)
     
     def evaluate(self, _):
