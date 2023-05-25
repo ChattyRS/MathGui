@@ -2,6 +2,8 @@
 
 MathGui is a simple text-based mathematical calculator written in Python. Its current functions include calculating mathematical expressions, solving functions for x, converting to and from scientific notation, plotting functions of x, and unit conversion.
 
+![Preview](./assets/readme_preview.png)
+
 ## Usage
 
 * Install the required software (see Software and installation below).
