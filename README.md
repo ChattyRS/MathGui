@@ -15,11 +15,11 @@ MathGui is a simple text-based mathematical calculator written in Python. Its cu
 
 * [Python 3.10](https://www.python.org/)
 
-After installing Python, you can install the remaining dependencies as follows:
+After installing Python, you can install the remaining dependencies by running `install.bat` or using the command:
 ```
 $ pip install -r requirements.txt
 ```
-Or install the following libraries manually:
+Alternatively, you can install the following libraries manually:
 * [ttkthemes](https://ttkthemes.readthedocs.io/en/latest/)
 * [NumPy](http://www.numpy.org/)
 * [matplotlib](https://matplotlib.org/)
